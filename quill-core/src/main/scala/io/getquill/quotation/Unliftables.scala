@@ -74,7 +74,8 @@ trait Unliftables {
   }
 
   implicit val queryUnliftable: Unliftable[Query] = Unliftable[Query] {
-    case q"$pack.Entity.apply(${ a: String }, ${ b: Option[String] }, ${ c: List[PropertyAlias] })" => Entity(a, b, c)
+    case q"$pack.Entity.apply(${ a: String }, ${ b: Option[String] }, ${ c: List[PropertyAlias] }, ${ d: Option[String] })" => Entity(a, b, c, d)
+    case q"$pack.Schema.apply(${ a: Ast }, ${ b: Ident }, ${ c: Ast })" => Schema(a, b, c)
     case q"$pack.Filter.apply(${ a: Ast }, ${ b: Ident }, ${ c: Ast })" => Filter(a, b, c)
     case q"$pack.Map.apply(${ a: Ast }, ${ b: Ident }, ${ c: Ast })" => Map(a, b, c)
     case q"$pack.FlatMap.apply(${ a: Ast }, ${ b: Ident }, ${ c: Ast })" => FlatMap(a, b, c)
@@ -135,5 +136,11 @@ trait Unliftables {
   }
   implicit val identUnliftable: Unliftable[Ident] = Unliftable[Ident] {
     case q"$pack.Ident.apply(${ a: String })" => Ident(a)
+  }
+
+  implicit val schemaUnliftable: Unliftable[SchemaDefinition] = Unliftable[SchemaDefinition] {
+    case q"$pack.Table.apply(${ a: Ast }, ${ b: String })"                 => Table(a, b)
+    case q"$pack.Columns.apply(${ a: Ast }, ${ b: List[PropertyAlias] })"  => Columns(a, b)
+    case q"$pack.Generated.apply(${ a: Ast }, ${ b: Ident }, ${ c: Ast })" => Generated(a, b, c)
   }
 }

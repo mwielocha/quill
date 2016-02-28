@@ -47,6 +47,7 @@ sealed trait EntityQuery[T]
   extends Query[T] {
 
   def apply(alias: String, propertyAlias: (T => (Any, String))*): EntityQuery[T]
+  def schema(f: Schema[T] => Any): EntityQuery[T]
 
   override def withFilter(f: T => Boolean): EntityQuery[T]
   override def filter(f: T => Boolean): EntityQuery[T]
@@ -57,6 +58,12 @@ sealed trait EntityQuery[T]
   def update: T => UnassignedAction[T] with Update[T]
   def update(f: (T => (Any, Any)), f2: (T => (Any, Any))*): Update[T]
   def delete: Delete[T]
+}
+
+sealed trait Schema[T] {
+  def table(alias: String): Schema[T]
+  def columns(propertyAlias: (T => (Any, String))*): Schema[T]
+  def generated(f: T => Any): Schema[T]
 }
 
 sealed trait Action[T]

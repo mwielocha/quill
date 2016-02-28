@@ -15,6 +15,7 @@ trait Liftables {
     case ast: Action => actionLiftable(ast)
     case ast: Value => valueLiftable(ast)
     case ast: Ident => identLiftable(ast)
+    case ast: SchemaDefinition => schemaLiftable(ast)
     case Property(a, b) => q"$pack.Property($a, $b)"
     case Function(a, b) => q"$pack.Function($a, $b)"
     case FunctionApply(a, b) => q"$pack.FunctionApply($a, $b)"
@@ -69,8 +70,9 @@ trait Liftables {
   }
 
   implicit val queryLiftable: Liftable[Query] = Liftable[Query] {
-    case Entity(a, b, c)        => q"$pack.Entity($a, $b, $c)"
+    case Entity(a, b, c, d)     => q"$pack.Entity($a, $b, $c, $d)"
     case Filter(a, b, c)        => q"$pack.Filter($a, $b, $c)"
+    case Schema(a, b, c)        => q"$pack.Schema($a, $b, $c)"
     case Map(a, b, c)           => q"$pack.Map($a, $b, $c)"
     case FlatMap(a, b, c)       => q"$pack.FlatMap($a, $b, $c)"
     case SortBy(a, b, c, d)     => q"$pack.SortBy($a, $b, $c, $d)"
@@ -124,5 +126,11 @@ trait Liftables {
   }
   implicit val identLiftable: Liftable[Ident] = Liftable[Ident] {
     case Ident(a) => q"$pack.Ident($a)"
+  }
+
+  implicit val schemaLiftable: Liftable[SchemaDefinition] = Liftable[SchemaDefinition] {
+    case Table(a, b)        => q"$pack.Table($a, $b)"
+    case Columns(a, b)      => q"$pack.Columns($a, $b)"
+    case Generated(a, b, c) => q"$pack.Generated($a, $b, $c)"
   }
 }

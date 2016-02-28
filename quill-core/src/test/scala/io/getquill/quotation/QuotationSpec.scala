@@ -740,6 +740,23 @@ class QuotationSpec extends Spec {
     }
   }
 
+  "schema definition" in {
+    val q = quote {
+      query[TestEntity].schema(s => s.table("test").columns(_.i -> "'i", _.o -> "'o").generated(c => c.i))
+    }
+
+    quote(unquote(q)).ast mustEqual
+      Schema(
+        Entity("TestEntity"),
+        Ident("s"),
+        Generated(
+          Columns(
+            Table(Ident("s"), "test"), List(PropertyAlias("i", "'i"), PropertyAlias("o", "'o"))
+          ), Ident("c"), Property(Ident("c"), "i")
+        )
+      )
+  }
+
   "doesn't double quote" in {
     val q = quote(1)
     val dq: Quoted[Int] = quote(q)

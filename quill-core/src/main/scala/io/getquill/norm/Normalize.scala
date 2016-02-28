@@ -6,7 +6,7 @@ import io.getquill.norm.capture.AvoidCapture
 object Normalize extends StatelessTransformer {
 
   override def apply(q: Ast): Ast =
-    super.apply(BetaReduction(q))
+    super.apply(BetaReduction(MergeSchemaWithEntity(q)))
 
   override def apply(q: Query): Query =
     norm(AvoidCapture(q))

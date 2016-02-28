@@ -17,7 +17,9 @@ sealed trait Ast {
 
 sealed trait Query extends Ast
 
-case class Entity(name: String, alias: Option[String] = None, properties: List[PropertyAlias] = List()) extends Query
+case class Entity(name: String, alias: Option[String] = None, properties: List[PropertyAlias] = List(), generated: Option[String] = None) extends Query
+
+case class Schema(ast: Ast, alias: Ident, schema: Ast) extends Query
 
 case class PropertyAlias(property: String, alias: String)
 
@@ -101,6 +103,13 @@ case class Delete(query: Ast) extends Action
 case class AssignedAction(action: Ast, assignments: List[Assignment]) extends Action
 
 case class Assignment(input: Ident, property: String, value: Ast)
+
+//************************************************************
+
+sealed trait SchemaDefinition extends Ast
+case class Table(schema: Ast, alias: String) extends SchemaDefinition
+case class Columns(schema: Ast, properties: List[PropertyAlias]) extends SchemaDefinition
+case class Generated(schema: Ast, alias: Ident, body: Ast) extends SchemaDefinition
 
 //************************************************************
 

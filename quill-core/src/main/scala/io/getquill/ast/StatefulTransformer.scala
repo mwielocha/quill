@@ -6,12 +6,13 @@ trait StatefulTransformer[T] {
 
   def apply(e: Ast): (Ast, StatefulTransformer[T]) =
     e match {
-      case e: Query     => apply(e)
-      case e: Operation => apply(e)
-      case e: Action    => apply(e)
-      case e: Value     => apply(e)
+      case e: Query            => apply(e)
+      case e: Operation        => apply(e)
+      case e: Action           => apply(e)
+      case e: Value            => apply(e)
+      case e: SchemaDefinition => apply(e)
 
-      case e: Ident     => (e, this)
+      case e: Ident            => (e, this)
 
       case Function(a, b) =>
         val (bt, btt) = apply(b)
@@ -42,6 +43,10 @@ trait StatefulTransformer[T] {
   def apply(e: Query): (Query, StatefulTransformer[T]) =
     e match {
       case e: Entity => (e, this)
+      case Schema(a, b, c) =>
+        val (at, att) = apply(a)
+        val (ct, ctt) = att.apply(c)
+        (Schema(at, b, ct), ctt)
       case Filter(a, b, c) =>
         val (at, att) = apply(a)
         val (ct, ctt) = att.apply(c)
@@ -140,6 +145,20 @@ trait StatefulTransformer[T] {
       case Assignment(a, b, c) =>
         val (ct, ctt) = apply(c)
         (Assignment(a, b, ct), ctt)
+    }
+
+  def apply(e: SchemaDefinition): (SchemaDefinition, StatefulTransformer[T]) =
+    e match {
+      case Table(a, b) =>
+        val (at, att) = apply(a)
+        (Table(at, b), att)
+      case Columns(a, b) =>
+        val (at, att) = apply(a)
+        (Columns(at, b), att)
+      case Generated(a, b, c) =>
+        val (at, att) = apply(a)
+        val (ct, ctt) = att.apply(c)
+        (Generated(at, b, ct), ctt)
     }
 
   def apply[U, R](list: List[U])(f: StatefulTransformer[T] => U => (R, StatefulTransformer[T])) =

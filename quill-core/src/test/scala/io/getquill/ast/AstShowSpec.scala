@@ -505,4 +505,35 @@ class AstShowSpec extends Spec {
     (q.ast: Ast).show mustEqual
       """query[TestEntity].distinct"""
   }
+
+  "shows schema" - {
+    "table" - {
+      val q = quote {
+        query[TestEntity].schema(s => s.table("test"))
+      }
+      (q.ast: Ast).show mustEqual
+        """query[TestEntity].schema(s => s.table("test"))"""
+    }
+    "columns" - {
+      val q = quote {
+        query[TestEntity].schema(s => s.columns(_.i -> "'i", _.o -> "'o"))
+      }
+      (q.ast: Ast).show mustEqual
+        """query[TestEntity].schema(s => s.columns(_.i -> "'i", _.o -> "'o"))"""
+    }
+    "generated" - {
+      val q = quote {
+        query[TestEntity].schema(s => s.generated(c => c.i))
+      }
+      (q.ast: Ast).show mustEqual
+        """query[TestEntity].schema(s => s.generated(c => c.i))"""
+    }
+    "composed" - {
+      val q = quote {
+        query[TestEntity].schema(s => s.table("test").columns(_.i -> "'i", _.o -> "'o").generated(c => c.i))
+      }
+      (q.ast: Ast).show mustEqual
+        """query[TestEntity].schema(s => s.table("test").columns(_.i -> "'i", _.o -> "'o").generated(c => c.i))"""
+    }
+  }
 }

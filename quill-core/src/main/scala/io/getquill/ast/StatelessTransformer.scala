@@ -8,6 +8,7 @@ trait StatelessTransformer {
       case e: Operation                => apply(e)
       case e: Action                   => apply(e)
       case e: Value                    => apply(e)
+      case e: SchemaDefinition         => apply(e)
 
       case Function(params, body)      => Function(params, apply(body))
       case e: Ident                    => e
@@ -22,6 +23,7 @@ trait StatelessTransformer {
   def apply(e: Query): Query =
     e match {
       case e: Entity          => e
+      case Schema(a, b, c)    => Schema(apply(a), b, apply(c))
       case Filter(a, b, c)    => Filter(apply(a), b, apply(c))
       case Map(a, b, c)       => Map(apply(a), b, apply(c))
       case FlatMap(a, b, c)   => FlatMap(apply(a), b, apply(c))
@@ -60,8 +62,16 @@ trait StatelessTransformer {
       case Delete(query)                       => Delete(apply(query))
     }
 
+  def apply(e: SchemaDefinition): SchemaDefinition =
+    e match {
+      case Table(a, b)        => Table(apply(a), b)
+      case Columns(a, b)      => Columns(apply(a), b)
+      case Generated(a, b, c) => Generated(apply(a), b, apply(c))
+    }
+
   private def apply(e: Assignment): Assignment =
     e match {
       case Assignment(input, property, value) => Assignment(input, property, apply(value))
     }
+
 }

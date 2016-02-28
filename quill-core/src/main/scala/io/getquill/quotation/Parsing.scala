@@ -44,6 +44,7 @@ trait Parsing {
     case `optionOperationParser`(value)     => value
     case `boxingParser`(value)              => value
     case `ifParser`(value)                  => value
+    case `schemaParser`(schema)             => schema
 
     case q"$i: $typ"                        => astParser(i)
 
@@ -119,6 +120,9 @@ trait Parsing {
     case q"$pack.query[${ t: Type }]" =>
       Entity(t.typeSymbol.name.decodedName.toString, None, List())
 
+    case q"$source.schema(($alias) => $body)" =>
+      Schema(astParser(source), identParser(alias), schemaParser(body))
+
     case q"$source.filter(($alias) => $body)" if (is[QuillQuery[Any]](source)) =>
       Filter(astParser(source), identParser(alias), astParser(body))
 
@@ -171,6 +175,15 @@ trait Parsing {
     case q"$source.distinct" if (is[QuillQuery[Any]](source)) =>
       Distinct(astParser(source))
 
+  }
+
+  implicit val schemaParser: Parser[Ast] = Parser[Ast] {
+    case q"$s.table(${ alias: String })" =>
+      Table(astParser(s), alias)
+    case q"$s.columns(..$propertyAliases)" =>
+      Columns(astParser(s), propertyAliases.map(propertyAliasParser(_)))
+    case q"$s.generated(($alias) => $body)" =>
+      Generated(astParser(s), identParser(alias), astParser(body))
   }
 
   implicit val orderingParser: Parser[Ordering] = Parser[Ordering] {

@@ -7,6 +7,7 @@ object NormalizeNestedStructures {
   def unapply(q: Query): Option[Query] =
     q match {
       case e: Entity          => None
+      case Schema(a, b, c)    => apply(a, c)(Schema(_, b, _))
       case Map(a, b, c)       => apply(a, c)(Map(_, b, _))
       case FlatMap(a, b, c)   => apply(a, c)(FlatMap(_, b, _))
       case Filter(a, b, c)    => apply(a, c)(Filter(_, b, _))

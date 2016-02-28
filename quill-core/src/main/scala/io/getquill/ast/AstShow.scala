@@ -8,17 +8,18 @@ import io.getquill.util.Show.listShow
 object AstShow {
 
   implicit val astShow: Show[Ast] = Show[Ast] {
-    case ast: Query           => ast.show
-    case ast: Function        => ast.show
-    case ast: Value           => ast.show
-    case ast: Operation       => ast.show
-    case ast: Action          => ast.show
-    case ast: Ident           => ast.show
-    case ast: Property        => ast.show
-    case ast: Infix           => ast.show
-    case ast: OptionOperation => ast.show
-    case ast: Dynamic         => ast.show
-    case ast: If              => ast.show
+    case ast: Query            => ast.show
+    case ast: Function         => ast.show
+    case ast: Value            => ast.show
+    case ast: Operation        => ast.show
+    case ast: Action           => ast.show
+    case ast: Ident            => ast.show
+    case ast: Property         => ast.show
+    case ast: Infix            => ast.show
+    case ast: OptionOperation  => ast.show
+    case ast: Dynamic          => ast.show
+    case ast: If               => ast.show
+    case ast: SchemaDefinition => ast.show
   }
 
   implicit val ifShow: Show[If] = Show[If] {
@@ -36,6 +37,9 @@ object AstShow {
         case Nil    => s"query[${q.name}]"
         case params => s"query[${q.name}](${params.mkString(", ")})"
       }
+
+    case Schema(source, alias, body) =>
+      s"${source.show}.schema(${alias.show} => ${body.show})"
 
     case Filter(source, alias, body) =>
       s"${source.show}.filter(${alias.show} => ${body.show})"
@@ -154,6 +158,16 @@ object AstShow {
       val ps = params.map(showParam)
       val body = StringContext(parts: _*).s(ps: _*)
       s"""infix"$body""""
+  }
+
+  implicit val schemaDefinitionShow: Show[SchemaDefinition] = Show[SchemaDefinition] {
+    case Table(schema, alias) =>
+      s"""${schema.show}.table("$alias")"""
+    case Columns(schema, properties) =>
+      val propertiesShow = properties.map(p => s"""_.${p.property} -> "${p.alias}"""")
+      s"""${schema.show}.columns(${propertiesShow.mkString(", ")})"""
+    case Generated(schema, alias, body) =>
+      s"${schema.show}.generated(${alias.show} => ${body.show})"
   }
 
   private def scopedShow(ast: Ast) =
