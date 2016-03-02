@@ -1,6 +1,6 @@
 ###IMPORTANT: This is the documentation for the latest `SNAPSHOT` version. Please refer to the website at [http://getquill.io](http://getquill.io) for the lastest release's documentation.###
 
-![quill](https://raw.githubusercontent.com/getquill/quill/master/quill.png)
+![quill](https://raw.githubusercontent.com/getquill/quill/master/quill-docs/quill.png)
 # Quill
 Compile-time Language Integrated Query for Scala
 
@@ -12,7 +12,7 @@ Compile-time Language Integrated Query for Scala
 
 Quill provides a Quoted Domain Specific Language ([QDSL](http://homepages.inf.ed.ac.uk/slindley/papers/qdsl-draft-february2015.pdf)) to express queries in Scala and execute them in a target language. The library's core is designed to support multiple target languages, currently featuring specializations for Structured Query Language ([SQL](https://en.wikipedia.org/wiki/SQL)) and Cassandra Query Language ([CQL](https://cassandra.apache.org/doc/cql3/CQL.html#selectStmt)).
 
-![example](https://raw.githubusercontent.com/getquill/quill/master/example.gif)
+![example](https://raw.githubusercontent.com/getquill/quill/master/quill-docs/example.gif)
 
 1. **Boilerplate-free mapping**: The database schema is mapped using simple case classes.
 2. **Quoted DSL**: Queries are defined inside a `quote` block. Quill parses each quoted block of code (quotation) at compile time and translates them to an internal Abstract Syntax Tree (AST)
@@ -885,8 +885,9 @@ lazy val db = source(new JdbcSourceConfig[MySQLDialect, SnakeCase]("db"))
 
 The SQL dialect to be used by the source is defined by the first type parameter. Some source types are specific to a database and thus not require it.
 
-Quill has two built-in dialects:
+Quill has three built-in dialects:
 
+- `io.getquill.sources.sql.idiom.H2Dialect`
 - `io.getquill.sources.sql.idiom.MySQLDialect`
 - `io.getquill.sources.sql.idiom.PostgresDialect`
 
@@ -895,15 +896,16 @@ Quill has two built-in dialects:
 The second type parameter defines the naming strategy to be used when translating identifiers (table and column names) to SQL. 
 
 
-|           strategy               |          example             |
-|----------------------------------|------------------------------|
-| `io.getquill.naming.Literal`     | some_ident -> some_ident     |
-| `io.getquill.naming.Escape`      | some_ident -> "some_ident"   |
-| `io.getquill.naming.UpperCase`   | some_ident -> SOME_IDENT     |
-| `io.getquill.naming.LowerCase`   | SOME_IDENT -> some_ident     |
-| `io.getquill.naming.SnakeCase`   | someIdent -> some_ident      |
-| `io.getquill.naming.CamelCase`   | some_ident -> someIdent      |
-| `io.getquill.naming.MysqlEscape` | some_ident -> \`some_ident\` |
+|           strategy                  |          example              |
+|-------------------------------------|-------------------------------|
+| `io.getquill.naming.Literal`        | some_ident  -> some_ident     |
+| `io.getquill.naming.Escape`         | some_ident  -> "some_ident"   |
+| `io.getquill.naming.UpperCase`      | some_ident  -> SOME_IDENT     |
+| `io.getquill.naming.LowerCase`      | SOME_IDENT  -> some_ident     |
+| `io.getquill.naming.SnakeCase`      | someIdent   -> some_ident     |
+| `io.getquill.naming.CamelCase`      | some_ident  -> someIdent      |
+| `io.getquill.naming.MysqlEscape`    | some_ident  -> \`some_ident\` |
+| `io.getquill.naming.PostgresEscape` | $some_ident -> $some_ident    |
 
 Multiple transformations can be defined using mixin. For instance, the naming strategy 
 
@@ -943,7 +945,7 @@ sbt dependencies
 ```
 libraryDependencies ++= Seq(
   "mysql" % "mysql-connector-java" % "5.1.36",
-  "io.getquill" %% "quill-jdbc" % "0.4.1-SNAPSHOT"
+  "io.getquill" %% "quill-jdbc" % "0.4.2-SNAPSHOT"
 )
 ```
 
@@ -974,7 +976,7 @@ sbt dependencies
 ```
 libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.4-1206-jdbc41",
-  "io.getquill" %% "quill-jdbc" % "0.4.1-SNAPSHOT"
+  "io.getquill" %% "quill-jdbc" % "0.4.2-SNAPSHOT"
 )
 ```
 
@@ -1005,7 +1007,7 @@ db.connectionTimeout=30000
 sbt dependencies
 ```
 libraryDependencies ++= Seq(
-  "io.getquill" %% "quill-async" % "0.4.1-SNAPSHOT"
+  "io.getquill" %% "quill-async" % "0.4.2-SNAPSHOT"
 )
 ```
 
@@ -1035,7 +1037,7 @@ db.poolValidationInterval=100
 sbt dependencies
 ```
 libraryDependencies ++= Seq(
-  "io.getquill" %% "quill-async" % "0.4.1-SNAPSHOT"
+  "io.getquill" %% "quill-async" % "0.4.2-SNAPSHOT"
 )
 ```
 
@@ -1065,7 +1067,7 @@ db.poolValidationInterval=100
 sbt dependencies
 ```
 libraryDependencies ++= Seq(
-  "io.getquill" %% "quill-finagle-mysql" % "0.4.1-SNAPSHOT"
+  "io.getquill" %% "quill-finagle-mysql" % "0.4.2-SNAPSHOT"
 )
 ```
 
@@ -1095,7 +1097,7 @@ db.pool.maxWaiters=2147483647
 sbt dependencies
 ```
 libraryDependencies ++= Seq(
-  "io.getquill" %% "quill-cassandra" % "0.4.1-SNAPSHOT"
+  "io.getquill" %% "quill-cassandra" % "0.4.2-SNAPSHOT"
 )
 ```
 
@@ -1141,11 +1143,11 @@ db.session.addressTranslater=com.datastax.driver.core.policies.IdentityTranslate
 
 # Slick comparison #
 
-Please refer to [SLICK.md](https://github.com/getquill/quill/blob/master/SLICK.md) for a detailed comparison between Quill and Slick.
+Please refer to [SLICK.md](https://github.com/getquill/quill/blob/master/quill-docs/SLICK.md) for a detailed comparison between Quill and Slick.
 
 # Cassandra libraries comparison #
 
-Please refer to [CASSANDRA.md](https://github.com/getquill/quill/blob/master/CASSANDRA.md) for a detailed comparison between Quill and other main alternatives for interaction with Cassandra in Scala.
+Please refer to [CASSANDRA.md](https://github.com/getquill/quill/blob/master/quill-docs/CASSANDRA.md) for a detailed comparison between Quill and other main alternatives for interaction with Cassandra in Scala.
 
 # Acknowledgments #
 

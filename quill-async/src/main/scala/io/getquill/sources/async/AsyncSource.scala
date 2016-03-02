@@ -60,12 +60,12 @@ class AsyncSource[D <: SqlIdiom, N <: NamingStrategy, C <: Connection](config: A
       f(TransactionalExecutionContext(ec, c))
     }
 
-  def execute(sql: String)(implicit ec: ExecutionContext) = {
+  def execute(sql: String, generated: Option[String])(implicit ec: ExecutionContext) = {
     logger.info(sql)
     withConnection(_.sendQuery(sql))
   }
 
-  def execute[T](sql: String, bindParams: T => BindedStatementBuilder[List[Any]] => BindedStatementBuilder[List[Any]])(implicit ec: ExecutionContext): ActionApply[T] = {
+  def execute[T](sql: String, bindParams: T => BindedStatementBuilder[List[Any]] => BindedStatementBuilder[List[Any]], generated: Option[String])(implicit ec: ExecutionContext): ActionApply[T] = {
     def run(values: List[T]): Future[List[DBQueryResult]] =
       values match {
         case Nil =>

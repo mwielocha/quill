@@ -19,10 +19,10 @@ class CassandraSourceMacro(val c: Context) extends SourceMacro {
   override protected def prepare(ast: Ast, params: List[Ident]) =
     if (!IsDynamic(ast)) {
       implicit val n = LoadNaming.static(c)(namingType)
-      val (cql, idents) = Prepare(ast, params)
+      val (cql, idents, generated) = Prepare(ast, params)
       c.info(cql)
       probe(cql)
-      q"($cql, $idents)"
+      q"($cql, $idents, $generated)"
     } else {
       c.info("Dynamic query")
       q"""

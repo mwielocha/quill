@@ -1,8 +1,6 @@
 package io.getquill.sources.jdbc
 
-import java.sql.Connection
-import java.sql.PreparedStatement
-import java.sql.ResultSet
+import java.sql.{ Statement, Connection, PreparedStatement, ResultSet }
 import scala.util.DynamicVariable
 import com.typesafe.scalalogging.StrictLogging
 import io.getquill.naming.NamingStrategy
@@ -67,25 +65,34 @@ class JdbcSource[D <: SqlIdiom, N <: NamingStrategy](config: JdbcSourceConfig[D,
       }
     }
 
-  def execute(sql: String): Int = {
+  def execute(sql: String, generated: Option[String]): Int = {
     logger.info(sql)
-    withConnection {
-      _.prepareStatement(sql).executeUpdate
+    withConnection { conn =>
+      generated match {
+        case None =>
+          conn.prepareStatement(sql).executeUpdate
+        case Some(column) =>
+          val ps = conn.prepareStatement(sql, List(column).toArray)
+          ps.executeUpdate()
+          extractResult(ps.getGeneratedKeys, _.getInt(1)).head
+      }
     }
   }
 
-  def execute[T](sql: String, bindParams: T => BindedStatementBuilder[PreparedStatement] => BindedStatementBuilder[PreparedStatement]): ActionApply[T] = {
+  def execute[T](sql: String, bindParams: T => BindedStatementBuilder[PreparedStatement] => BindedStatementBuilder[PreparedStatement],
+                 generated: Option[String]): ActionApply[T] = {
     val func = { (values: List[T]) =>
       val groups = values.map(bindParams(_)(new BindedStatementBuilder[PreparedStatement]).build(sql)).groupBy(_._1)
       (for ((sql, setValues) <- groups.toList) yield {
         logger.info(sql)
         withConnection { conn =>
-          val ps = conn.prepareStatement(sql)
+          val ps = generated.fold(conn.prepareStatement(sql))(c => conn.prepareStatement(sql, List(c).toArray))
           for ((_, set) <- setValues) {
             set(ps)
             ps.addBatch
           }
-          ps.executeBatch.toList
+          val updateCount = ps.executeBatch.toList
+          generated.fold(updateCount)(_ => extractResult(ps.getGeneratedKeys, _.getInt(1)))
         }
       }).flatten
     }
@@ -108,4 +115,5 @@ class JdbcSource[D <: SqlIdiom, N <: NamingStrategy](config: JdbcSourceConfig[D,
       extractResult(rs, extractor, acc :+ extractor(rs))
     else
       acc
+
 }

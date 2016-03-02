@@ -35,12 +35,12 @@ class SqlMirrorSource[N <: NamingStrategy](config: SqlMirrorSourceConfig[N])
 
   case class ActionMirror(sql: String)
 
-  def execute(sql: String) =
+  def execute(sql: String, generated: Option[String]) =
     ActionMirror(sql)
 
   case class BatchActionMirror(sql: String, bindList: List[Row])
 
-  def execute[T](sql: String, bindParams: T => Row => Row) = {
+  def execute[T](sql: String, bindParams: T => Row => Row, generated: Option[String]) = {
     val func = (values: List[T]) =>
       BatchActionMirror(sql, values.map(bindParams).map(_(Row())))
     new ActionApply(func)
